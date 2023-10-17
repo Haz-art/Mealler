@@ -1,16 +1,25 @@
-import { format } from "date-fns"
 import { GoCalendar } from "react-icons/go"
-
 import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
 import { Button } from "./ui/button"
-import { useState } from "react"
 import { Calendar } from "./ui/calendar"
+
+import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 
-export default function DatePicker() {
-  const [date, setDate] = useState(new Date())
+interface DataPickerProps {
+  date: Date
+  setDate: (value: Date) => void
+}
 
-  const onChange = (value: any) => {
+export default function DatePicker({
+  date,
+  setDate
+} : DataPickerProps) {
+  const onChange = (value: Date | undefined) => {
+    console.log(value);
+    
+    if(!value) return
+
     setDate(value)
   }
 
@@ -24,7 +33,8 @@ export default function DatePicker() {
             !date && "text-muted-foreground"
           )}
         >
-          {format(date, "PPP")}
+          <span className="md:hidden">{format(date, "EEE")}</span>
+          <span className="hidden md:block">{format(date, "PPP")}</span>
           <GoCalendar className="ml-auto h-4 w-4 opacity-50" />
         </Button>
       </PopoverTrigger>
