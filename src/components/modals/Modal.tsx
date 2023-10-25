@@ -6,27 +6,19 @@ import { useOnClickOutside } from "usehooks-ts"
 interface ModalProps {
   isOpen?: boolean
   onClose: () => void
-  onSubmit: () => void
   title?: string
   body?: React.ReactElement
   footer?: React.ReactElement
-  actionLabel?: string
   disabled?: boolean
-  secondaryAction?: () => void
-  secondaryActionLabel?: string
 }
 
 const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
-  onSubmit,
   title,
   body,
-  actionLabel,
   footer,
   disabled,
-  secondaryAction,
-  secondaryActionLabel,
 }) => {
   const [showModal, setShowModal] = useState(isOpen)
   const modalRef = useRef(null)
@@ -47,22 +39,6 @@ const Modal: React.FC<ModalProps> = ({
   }, [onClose, disabled])
 
   useOnClickOutside(modalRef, handleClose)
-
-  const handleSubmit = useCallback(() => {
-    if (disabled) {
-      return
-    }
-
-    onSubmit()
-  }, [onSubmit, disabled])
-
-  const handleSecondaryAction = useCallback(() => {
-    if (disabled || !secondaryAction) {
-      return
-    }
-
-    secondaryAction()
-  }, [secondaryAction, disabled])
 
   if (!isOpen) {
     return null
@@ -92,7 +68,6 @@ const Modal: React.FC<ModalProps> = ({
           md:w-4/6
           lg:w-3/6
           xl:w-2/5
-          my-6
           mx-auto 
           h-full 
           lg:h-auto
@@ -158,33 +133,9 @@ const Modal: React.FC<ModalProps> = ({
               {/*body*/}
               <div className="relative p-6 flex-auto">{body}</div>
               {/*footer*/}
-              <div className="flex flex-col gap-2 p-6">
-                <div
-                  className="
-                    flex 
-                    flex-row 
-                    items-center 
-                    gap-4 
-                    w-full
-                  "
-                >
-                  {secondaryAction && secondaryActionLabel && (
-                    <Button
-                      disabled={disabled}
-                      onClick={handleSecondaryAction}
-                      variant="outline"
-                    >
-                      {secondaryActionLabel}
-                    </Button>
-                  )}
-                  {actionLabel && (
-                    <Button disabled={disabled} onClick={handleSubmit}>
-                      {actionLabel}
-                    </Button>
-                  )}
-                </div>
-                {footer}
-              </div>
+              {!!footer && (
+                <div className="flex flex-col gap-2 p-6">{footer}</div>
+              )}
             </div>
           </div>
         </div>

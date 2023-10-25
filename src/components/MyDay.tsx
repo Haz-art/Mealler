@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react"
-import { useLocalStorage } from 'usehooks-ts'
+import { useLocalStorage } from "usehooks-ts"
 import { useMealViewModal } from "@/hooks/useMealViewModal"
 import cuid from "cuid"
+import { Meal } from "@/types/meal"
 
 import { LuSandwich } from "react-icons/lu"
 import { MdOutlineLocalCafe } from "react-icons/md"
@@ -11,16 +12,14 @@ import { RiDragDropLine } from "react-icons/ri"
 import { BiSolidTrashAlt } from "react-icons/bi"
 
 import { Button } from "./ui/button"
-import { Dish } from "./RecipeSection"
 import DatePicker from "./DatePicker"
-
-
+import { format } from "date-fns"
 
 enum MealType {
-  Breakfast = 'Breakfast',
-  Lunch = 'Lunch',
-  Dinner = 'Dinner',
-  Supper = 'Supper',
+  Breakfast = "Breakfast",
+  Lunch = "Lunch",
+  Dinner = "Dinner",
+  Supper = "Supper",
 }
 
 const sections = [
@@ -42,61 +41,58 @@ const sections = [
   },
 ]
 
-
 type MealData = {
-  [MealType.Breakfast]: Dish | null;
-  [MealType.Lunch]: Dish | null;
-  [MealType.Dinner]: Dish | null;
-  [MealType.Supper]: Dish | null;
-};
+  [MealType.Breakfast]: Meal | null
+  [MealType.Lunch]: Meal | null
+  [MealType.Dinner]: Meal | null
+  [MealType.Supper]: Meal | null
+}
 
 type DayMeals = {
-  [key: string]: MealData | null;
-};
+  [key: string]: MealData | null
+}
 
 type MealPlan = {
-  [key: string]: DayMeals;
-};
+  [key: string]: DayMeals
+}
 
 export default function MyDay() {
   const openMealModal = useMealViewModal((state) => state.onOpen)
-  const [selectedDay, setSelectedDay] = useState(new Date())
+  const [selectedDay, setSelectedDay] = useState(format(new Date(), "P"))
   const [mealPlan, setMealPlan] = useLocalStorage<MealPlan>("myDays", {})
 
-  const mealsForSelectedDay = selectedDay ? mealPlan[selectedDay.toISOString()] || {} : {};          
+  const mealsForSelectedDay = selectedDay ? mealPlan[selectedDay] || {} : {}
 
   useEffect(() => {
     console.log(mealPlan)
   }, [mealPlan])
 
-  const handleDayChange = (value: Date) => {
-    if(selectedDay === value) return;
-    
+  const handleDayChange = (value: string) => {
+    if (selectedDay === value) return
+
     setSelectedDay(value)
   }
 
   const removeMeal = (sectionId: string) => {
     setMealPlan((prevMealPlan) => {
-      const updatedMealPlan = { ...prevMealPlan };
-      const dayKey = selectedDay.toISOString();
-      if (updatedMealPlan[dayKey]) {
-        updatedMealPlan[dayKey][sectionId] = null;
+      const updatedMealPlan = { ...prevMealPlan }
+      if (updatedMealPlan[selectedDay]) {
+        updatedMealPlan[selectedDay][sectionId] = null
       }
-      return updatedMealPlan;
-    });
+      return updatedMealPlan
+    })
   }
 
   const handleOnDrop = (e: React.DragEvent, sectionId: string) => {
-    const mealInfo = JSON.parse(e.dataTransfer.getData("mealInfo")) as Dish
+    const mealInfo = JSON.parse(e.dataTransfer.getData("mealInfo")) as Meal
     setMealPlan((prevMealPlan) => {
-      const updatedMealPlan = { ...prevMealPlan };
-      const dayKey = selectedDay.toISOString();
-      if (!updatedMealPlan[dayKey]) {
-        updatedMealPlan[dayKey] = {};
+      const updatedMealPlan = { ...prevMealPlan }
+      if (!updatedMealPlan[selectedDay]) {
+        updatedMealPlan[selectedDay] = {}
       }
-      (updatedMealPlan[dayKey] as any)[sectionId] = mealInfo;
-      return updatedMealPlan;
-    });
+      ;(updatedMealPlan[selectedDay] as any)[sectionId] = mealInfo
+      return updatedMealPlan
+    })
   }
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -104,18 +100,23 @@ export default function MyDay() {
   }
 
   return (
-    <section className="w-1/4">
+    <section className="w-full">
       <div className="flex justify-between items-center border-b pb-4 mb-6">
         <h2 className="scroll-m-20 text-3xl font-semibold tracking-tight transition-colors first:mt-0">
           My day
         </h2>
-        <DatePicker date={selectedDay} setDate={(date) => handleDayChange(date)} />
+        <DatePicker
+          stringDate={selectedDay}
+          setDate={(date) => handleDayChange(format(date, "P"))}
+        />
       </div>
 
       <div className="flex flex-col gap-4 text-center px-5 select-none">
         {sections.map((section) => {
-          if(mealsForSelectedDay[section.name.toString()]){
-            const currentMeal = mealsForSelectedDay[section.name.toString()] as unknown as Dish
+          if (mealsForSelectedDay[section.name.toString()]) {
+            const currentMeal = mealsForSelectedDay[
+              section.name.toString()
+            ] as unknown as Meal
             return (
               <div
                 className="flex text-xl items-center justify-between border-b pb-4"
@@ -128,7 +129,7 @@ export default function MyDay() {
                     src={currentMeal.image}
                     alt={`${currentMeal.name} image`}
                     className="w-[40%]"
-                    onClick={() => openMealModal(section.name.toString())}
+                    onClick={() => openMealModal(currentMeal)}
                   />
 
                   <p className="w-[60%]">{currentMeal.name}</p>
@@ -161,10 +162,9 @@ export default function MyDay() {
                   <RiDragDropLine />
                 </div>
               </div>
-            )}
-          })
-        }
-        
+            )
+          }
+        })}
       </div>
     </section>
   )

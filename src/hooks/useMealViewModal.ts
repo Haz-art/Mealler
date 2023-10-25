@@ -1,21 +1,22 @@
+import { Meal } from "@/types/meal"
 import { create } from "zustand"
 
 interface MealViewModal {
   isOpen: boolean
-  mealId: number | string | null
+  dish: Meal | null
 
-  onOpen: (mealId: number | string) => void
+  onOpen: (dish: Meal) => void
   onClose: () => void
 }
 
 export const useMealViewModal = create<MealViewModal>((set) => ({
   isOpen: false,
-  mealId: null,
+  dish: null,
 
-  onOpen: (mealId) =>
+  onOpen: (dish: Meal) =>
     set(() => ({
       isOpen: true,
-      mealId,
+      dish: dish,
     })),
 
   onClose: () => set(() => ({ isOpen: false })),

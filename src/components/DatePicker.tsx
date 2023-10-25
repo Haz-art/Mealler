@@ -7,18 +7,16 @@ import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 
 interface DataPickerProps {
-  date: Date
+  stringDate: string
   setDate: (value: Date) => void
 }
 
-export default function DatePicker({
-  date,
-  setDate
-} : DataPickerProps) {
+export default function DatePicker({ stringDate, setDate }: DataPickerProps) {
+  const date = new Date(stringDate)
   const onChange = (value: Date | undefined) => {
-    console.log(value);
-    
-    if(!value) return
+    console.log(value)
+
+    if (!value) return
 
     setDate(value)
   }
@@ -29,12 +27,11 @@ export default function DatePicker({
         <Button
           variant={"outline"}
           className={cn(
-            "w-[240px] pl-3 text-left font-normal",
+            "w-[50px] lg:w-[125px] xl:w-[175px] lg:pl-3 text-left font-normal",
             !date && "text-muted-foreground"
           )}
         >
-          <span className="md:hidden">{format(date, "EEE")}</span>
-          <span className="hidden md:block">{format(date, "PPP")}</span>
+          <span className="hidden lg:block">{format(date, "EEE")}</span>
           <GoCalendar className="ml-auto h-4 w-4 opacity-50" />
         </Button>
       </PopoverTrigger>
