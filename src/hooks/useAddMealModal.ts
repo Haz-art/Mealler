@@ -1,4 +1,3 @@
-import { Meal } from "@/types/meal"
 import { create } from "zustand"
 
 interface AddMealModal {

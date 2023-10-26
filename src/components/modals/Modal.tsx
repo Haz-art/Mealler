@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react"
 import { IoMdClose } from "react-icons/io"
-import { Button } from "../ui/button"
 import { useOnClickOutside } from "usehooks-ts"
 
 interface ModalProps {
