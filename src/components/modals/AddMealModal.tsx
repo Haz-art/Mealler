@@ -1,5 +1,7 @@
 import { useAddMealModal } from "@/hooks/useAddMealModal"
 import Modal from "./Modal"
+import { Button } from "../ui/button"
+import { Input } from "../ui/input"
 import {
   Form,
   FormControl,
@@ -8,15 +10,13 @@ import {
   FormLabel,
   FormMessage,
 } from "../ui/form"
+import { ImageInput } from "../ImageInput"
+import toast from "react-hot-toast"
 
+import { useMutation } from "@tanstack/react-query"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-
 import * as z from "zod"
-import { Input } from "../ui/input"
-import { Button } from "../ui/button"
-import { useMutation } from "@tanstack/react-query"
-import toast from "react-hot-toast"
 
 const formSchema = z.object({
   name: z.string().min(1, {
@@ -45,21 +45,16 @@ export const AddMealModal: React.FC = () => {
           "Content-Type": "application/json",
         },
       })
-      console.log(
-        "🚀 ~ file: AddMealModal.tsx:44 ~ mutationFn: ~ JSON.stringify(values):",
-        JSON.stringify(values)
-      )
-      console.log(
-        "🚀 ~ file: AddMealModal.tsx:47 ~ mutationFn: ~ response:",
-        response
-      )
 
       if (!response.ok) throw new Error("Failed to add meal")
 
       return response.json()
     },
 
-    onSuccess: () => toast.success("Meal successfully added 😎"),
+    onSuccess: () => {
+      toast.success("Meal successfully added 😎")
+      onClose()
+    },
     onError: (err) => {
       console.log(err)
 
@@ -92,15 +87,17 @@ export const AddMealModal: React.FC = () => {
         <FormField
           control={form.control}
           name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter meal name" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+          render={({ field }) => {
+            return (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter meal name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )
+          }}
         />
         <FormField
           control={form.control}
@@ -118,11 +115,15 @@ export const AddMealModal: React.FC = () => {
         <FormField
           control={form.control}
           name="image"
-          render={({ field }) => (
+          render={() => (
             <FormItem>
               <FormLabel>Image (link)</FormLabel>
               <FormControl>
-                <Input placeholder="Enter meal image link" {...field} />
+                <ImageInput
+                  setValue={(value: string) => form.setValue("image", value)}
+                  name="image"
+                  value={form.getValues("image")}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -147,7 +148,7 @@ export const AddMealModal: React.FC = () => {
         />
 
         <div className="flex justify-end gap-2">
-          <Button type="reset" variant="ghost" size="lg">
+          <Button type="reset" variant="ghost" size="lg" onClick={onClose}>
             Cancel
           </Button>
           <Button type="submit" size="lg">
